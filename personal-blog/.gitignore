@@ -1,0 +1,12 @@
+node_modules/
+.npm-cache/
+dist/
+apps/web/dist/
+.DS_Store
+*.log
+.env
+.vercel/
+apps/api/data/*.sqlite
+apps/api/data/*.sqlite-*
+apps/api/data/*.sqlite.backup-*
+.env*.local

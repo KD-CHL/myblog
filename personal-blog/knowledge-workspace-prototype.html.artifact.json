@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "knowledge-workspace-prototype.html",
+  "entry": "knowledge-workspace-prototype.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-05T19:14:30.003Z",
+  "updatedAt": "2026-06-05T19:14:30.003Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

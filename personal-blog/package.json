@@ -1,0 +1,27 @@
+{
+  "name": "personal-blog-fullstack",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "npm run dev -w @personal-blog/web",
+    "dev:api": "npm run dev -w @personal-blog/api",
+    "db:migrate": "npm run db:migrate -w @personal-blog/api",
+    "build": "npm run build -w @personal-blog/web",
+    "preview": "npm run preview -w @personal-blog/web",
+    "start": "npm run start -w @personal-blog/api",
+    "test": "npm run test -w @personal-blog/api",
+    "check": "npm run test && npm run build"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.61.1"
+  }
+}

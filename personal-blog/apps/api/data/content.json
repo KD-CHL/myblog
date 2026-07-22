@@ -1,0 +1,94 @@
+{
+  "site": {
+    "brand": {
+      "mark": "K",
+      "title": "Knowledge Log",
+      "subtitle": "陈栖 / personal OS"
+    },
+    "navItems": ["总览", "文章库", "技术笔记", "作品集", "生活随笔", "归档"],
+    "filters": ["全部", "AI", "前端", "产品", "生活", "未读"],
+    "filterTags": ["全部", "React", "AI Agents", "CSS", "写作", "设计系统", "读书"],
+    "stats": [
+      { "value": "34", "label": "技术笔记" },
+      { "value": "12", "label": "作品项目" }
+    ],
+    "writingState": "本周主题：AI coding、内容系统、组件库治理。草稿 7 篇，待发布 2 篇。"
+  },
+  "posts": [
+    {
+      "id": "post-1",
+      "kind": "ARTICLE",
+      "title": "把个人博客设计成一个长期运行的系统",
+      "excerpt": "内容模型、搜索体验、标签体系和作品集入口如何协同。",
+      "category": "文章库",
+      "tags": ["产品", "写作", "前端"],
+      "date": "2026.06.05",
+      "readTime": "15 min",
+      "unread": true,
+      "featured": true,
+      "body": "我想要的个人博客不是一组静态页面，而是一套可以长期增量维护的知识工作台。文章负责沉淀观点，技术笔记负责保存可复用判断，作品集负责把项目从想法推进到可展示的状态。搜索和标签是整个系统的入口，它们让内容在几年后仍然能被找回。"
+    },
+    {
+      "id": "post-2",
+      "kind": "PROJECT",
+      "title": "Writing OS：从草稿到发布的内容流水线",
+      "excerpt": "一个将 Markdown、元数据和发布检查串起来的小工具。",
+      "category": "作品集",
+      "tags": ["产品", "工具"],
+      "date": "2026.06.01",
+      "readTime": "8 min",
+      "unread": false,
+      "featured": true,
+      "body": "Writing OS 的目标是减少发布前的摩擦：补齐标题、摘要、标签、引用和 changelog，再把它们变成可发布的页面。它不追求复杂，只把容易遗漏的步骤整理成稳定清单。"
+    },
+    {
+      "id": "post-3",
+      "kind": "LIFE",
+      "title": "散步时想到的重构策略",
+      "excerpt": "在日常缝隙里观察工程判断是怎么形成的。",
+      "category": "生活随笔",
+      "tags": ["生活", "写作"],
+      "date": "2026.05.24",
+      "readTime": "6 min",
+      "unread": false,
+      "featured": true,
+      "body": "真正有效的重构常常不是大张旗鼓，而是在重复使用中逐渐看见边界。散步能提供一个慢一点的上下文，让脑子把白天的噪音过滤掉，只留下那些值得动手的结构。"
+    },
+    {
+      "id": "post-5",
+      "kind": "NOTE",
+      "title": "搜索体验里的空状态",
+      "excerpt": "让无结果页面继续提供标签、建议和最近阅读入口。",
+      "category": "技术笔记",
+      "tags": ["产品", "前端"],
+      "date": "2026.05.12",
+      "readTime": "7 min",
+      "unread": false,
+      "featured": false,
+      "body": "空状态不应该只告诉用户没有内容。更好的方式是给出相邻路径：改写关键词、查看热门标签、回到最近阅读，或者订阅这个主题后续更新。"
+    },
+    {
+      "id": "post-6",
+      "kind": "NOTE",
+      "title": "组件库里最容易被忽略的文本密度",
+      "excerpt": "按钮、标签、输入框和列表行的尺寸如何保持扫描效率。",
+      "category": "技术笔记",
+      "tags": ["前端", "设计系统"],
+      "date": "2026.05.06",
+      "readTime": "9 min",
+      "unread": false,
+      "featured": false,
+      "body": "组件库的可用性经常败在文本密度上。字号、行高、标签长度和按钮宽度如果没有统一边界，页面很快就会从整洁变成难以扫描的碎片。"
+    }
+  ],
+  "projects": [
+    { "name": "Note Compiler", "description": "内容生成工具" },
+    { "name": "Design Token Lab", "description": "主题系统实验" },
+    { "name": "Reading Tracker", "description": "阅读索引" }
+  ],
+  "timeline": [
+    { "time": "09:30", "title": "整理技术笔记", "text": "把 RSC 缓存案例加入文章草稿。" },
+    { "time": "14:00", "title": "项目复盘", "text": "补充 Writing OS 的交互截图。" },
+    { "time": "21:20", "title": "生活随笔", "text": "记录一次晚间散步和代码 review。" }
+  ]
+}

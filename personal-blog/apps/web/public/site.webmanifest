@@ -1,0 +1,10 @@
+{
+  "name": "Knowledge Log",
+  "short_name": "Knowledge Log",
+  "description": "陈栖的个人博客和知识工作台。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef4fb",
+  "theme_color": "#162232",
+  "lang": "zh-CN"
+}

@@ -1,0 +1,12 @@
+node_modules
+.npm-cache
+.env
+.vercel
+apps/api/data/*.sqlite
+apps/api/data/*.sqlite-*
+apps/api/data/*.sqlite.backup-*
+apps/web/dist
+artifacts
+*.log
+knowledge-workspace-prototype.html
+knowledge-workspace-prototype.html.artifact.json

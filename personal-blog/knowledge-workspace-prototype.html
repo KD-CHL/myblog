@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Knowledge Log · 个人知识工作台</title>
+  <style>
+    :root {
+      --bg: oklch(95% 0.025 245);
+      --surface: oklch(99% 0.006 245);
+      --fg: oklch(22% 0.04 245);
+      --muted: oklch(52% 0.035 245);
+      --border: oklch(84% 0.025 245);
+      --accent: oklch(88% 0.22 105);
+
+      --accent-soft: color-mix(in oklch, var(--accent) 18%, transparent);
+      --fg-soft: color-mix(in oklch, var(--fg) 6%, transparent);
+      --sidebar: oklch(23% 0.045 245);
+      --sidebar-muted: color-mix(in oklch, var(--surface) 62%, transparent);
+      --surface-strong: oklch(100% 0 0);
+      --blue: oklch(60% 0.17 255);
+      --pink: oklch(62% 0.18 5);
+      --warn: oklch(78% 0.15 75);
+
+      --font-display: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, monospace;
+
+      --fs-h1: clamp(38px, 5vw, 64px);
+      --fs-h2: clamp(24px, 3vw, 34px);
+      --fs-h3: 19px;
+      --fs-lead: 18px;
+      --fs-body: 15px;
+      --fs-meta: 12px;
+      --gutter: clamp(18px, 3vw, 32px);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 28px 80px color-mix(in oklch, var(--fg) 18%, transparent);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-body);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.is-dark {
+      --bg: oklch(17% 0.035 245);
+      --surface: oklch(21% 0.035 245);
+      --surface-strong: oklch(24% 0.04 245);
+      --fg: oklch(92% 0.018 245);
+      --muted: oklch(68% 0.035 245);
+      --border: oklch(34% 0.04 245);
+      --sidebar: oklch(14% 0.03 245);
+      --blue: oklch(72% 0.15 255);
+      --pink: oklch(72% 0.17 5);
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3 {
+      font-family: var(--font-display);
+      text-wrap: balance;
+      letter-spacing: 0;
+    }
+    p { text-wrap: pretty; }
+    svg { display: block; }
+    .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .meta {
+      font-family: var(--font-mono);
+      font-size: var(--fs-meta);
+      color: var(--muted);
+      letter-spacing: 0;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .app-shell {
+      width: min(100% - 48px, 1440px);
+      min-height: calc(100vh - 48px);
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: 272px minmax(0, 1fr);
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .sidebar {
+      min-height: calc(100vh - 50px);
+      padding: 52px 46px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 34px;
+      color: var(--surface);
+      background: var(--sidebar);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: var(--sidebar);
+      font-family: var(--font-display);
+      font-weight: 900;
+    }
+    .brand strong,
+    .brand span { display: block; }
+    .brand strong { font-size: 17px; line-height: 1.2; }
+    .brand span {
+      margin-top: 2px;
+      color: var(--sidebar-muted);
+      font-size: 12px;
+    }
+    .side-nav {
+      display: grid;
+      gap: 8px;
+    }
+    .side-nav button {
+      width: 100%;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 7px;
+      color: color-mix(in oklch, var(--surface) 78%, transparent);
+      text-align: left;
+      background: transparent;
+    }
+    .side-nav button:hover,
+    .side-nav button:focus-visible {
+      outline: none;
+      color: var(--surface);
+      background: color-mix(in oklch, var(--surface) 8%, transparent);
+    }
+    .side-nav button.is-active {
+      color: var(--surface);
+      background: color-mix(in oklch, var(--surface) 13%, transparent);
+    }
+    .writing-state {
+      margin-top: auto;
+      padding-top: 24px;
+      border-top: 1px solid color-mix(in oklch, var(--surface) 15%, transparent);
+    }
+    .writing-state span {
+      display: block;
+      margin-top: 12px;
+      color: color-mix(in oklch, var(--surface) 82%, transparent);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .workspace {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 72px minmax(0, 1fr);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 24px 14px 32px;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in oklch, var(--surface) 74%, transparent);
+      backdrop-filter: blur(10px);
+    }
+    .search-box {
+      width: min(720px, 100%);
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--muted);
+      background: var(--surface-strong);
+    }
+    .search-box span {
+      flex: none;
+      color: var(--fg);
+      font-weight: 800;
+    }
+    .search-box input {
+      min-width: 90px;
+      flex: 1;
+      border: 0;
+      outline: 0;
+      color: var(--fg);
+      background: transparent;
+    }
+    .search-box input::placeholder { color: var(--muted); }
+    kbd {
+      min-width: 32px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--muted);
+      background: var(--fg-soft);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-align: center;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon-button,
+    .subscribe,
+    .chip,
+    .drawer-action {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--fg);
+      background: var(--surface-strong);
+      transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .icon-button:hover,
+    .chip:hover,
+    .drawer-action:hover { border-color: var(--fg); }
+    .icon-button:active,
+    .subscribe:active,
+    .chip:active,
+    .drawer-action:active { transform: translateY(1px); }
+    .icon-button { width: 44px; }
+    .subscribe {
+      padding: 0 14px;
+      border-color: var(--fg);
+      color: var(--surface);
+      background: var(--fg);
+      font-weight: 800;
+    }
+    .subscribe.is-on {
+      color: var(--surface);
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+    .content-shell {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 306px;
+    }
+    .main-panel {
+      padding: 34px 32px 42px;
+      border-right: 1px solid var(--border);
+    }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 32px;
+      margin-bottom: 28px;
+    }
+    .intro-grid h1 {
+      font-size: var(--fs-h1);
+      line-height: 1.05;
+      font-weight: 900;
+    }
+    .intro-copy {
+      max-width: 680px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: var(--fs-lead);
+      line-height: 1.65;
+    }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(96px, 1fr));
+      gap: 22px;
+    }
+    .stat {
+      min-width: 96px;
+      padding-left: 14px;
+      border-left: 2px solid var(--blue);
+    }
+    .stat strong {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 800;
+      color: var(--fg);
+    }
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .chip {
+      min-height: 38px;
+      padding: 0 16px;
+      border: 0;
+      background: var(--surface-strong);
+    }
+    .chip.is-active {
+      background: var(--accent);
+      color: var(--sidebar);
+      font-weight: 800;
+    }
+    .panel-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 22px;
+    }
+    .content-card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+    }
+    .card-head {
+      min-height: 50px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head h2 {
+      font-size: 18px;
+      font-weight: 850;
+    }
+    .post-list,
+    .note-list {
+      display: grid;
+    }
+    .post-card,
+    .note-card {
+      width: 100%;
+      padding: 20px 18px;
+      border: 0;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      color: var(--fg);
+      background: transparent;
+    }
+    .post-card:last-child,
+    .note-card:last-child { border-bottom: 0; }
+    .post-card:hover,
+    .post-card:focus-visible,
+    .note-card:hover,
+    .note-card:focus-visible {
+      outline: none;
+      background: var(--fg-soft);
+    }
+    .post-kind {
+      margin-bottom: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--pink);
+      letter-spacing: 0;
+    }
+    .post-card h3,
+    .note-card h3 {
+      font-size: var(--fs-h3);
+      line-height: 1.35;
+      font-weight: 850;
+    }
+    .post-card p,
+    .note-card p {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .note-card {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+    }
+    .note-icon {
+      margin-top: 2px;
+      color: var(--blue);
+    }
+    .empty-state {
+      padding: 32px 18px;
+      color: var(--muted);
+    }
+    .right-rail {
+      padding: 30px 24px;
+      background: color-mix(in oklch, var(--surface) 68%, transparent);
+    }
+    .rail-section + .rail-section { margin-top: 34px; }
+    .rail-list {
+      display: grid;
+      gap: 18px;
+      margin-top: 14px;
+    }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .timeline-item strong,
+    .project-card strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 15px;
+      line-height: 1.3;
+    }
+    .timeline-item p,
+    .project-card span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .project-card {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px 12px;
+      border-left: 2px solid var(--blue);
+      background: var(--surface-strong);
+    }
+    .project-card svg {
+      margin-top: 2px;
+      color: var(--fg);
+    }
+    .drawer-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      background: color-mix(in oklch, var(--fg) 30%, transparent);
+    }
+    .drawer {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      bottom: 24px;
+      z-index: 40;
+      width: min(520px, calc(100vw - 48px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      box-shadow: var(--shadow);
+      transform: translateX(calc(100% + 32px));
+      transition: transform 0.22s ease;
+    }
+    .drawer.is-open { transform: translateX(0); }
+    .drawer-scrim.is-open { display: block; }
+    .drawer-header,
+    .drawer-footer {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .drawer-footer {
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+    }
+    .drawer-title {
+      min-width: 0;
+    }
+    .drawer-title span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--pink);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+    .drawer-title h2 {
+      font-size: var(--fs-h2);
+      line-height: 1.18;
+    }
+    .drawer-close {
+      width: 40px;
+      height: 40px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--fg);
+      background: transparent;
+    }
+    .drawer-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 22px 20px 28px;
+    }
+    .drawer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+      background: transparent;
+    }
+    .drawer-body p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    .drawer-action {
+      padding: 0 14px;
+      background: var(--surface-strong);
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 60;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--fg);
+      background: var(--surface-strong);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 10px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    @media (max-width: 1180px) {
+      .app-shell {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+        border-inline: 0;
+        border-block: 0;
+      }
+      .content-shell { grid-template-columns: minmax(0, 1fr); }
+      .right-rail {
+        border-top: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+      .rail-section + .rail-section { margin-top: 0; }
+    }
+    @media (max-width: 920px) {
+      .app-shell {
+        display: block;
+      }
+      .sidebar {
+        min-height: auto;
+        padding: 18px var(--gutter);
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .side-nav,
+      .writing-state { display: none; }
+      .workspace { display: block; }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 12px var(--gutter);
+        gap: 12px;
+      }
+      .search-box span,
+      .search-box kbd { display: none; }
+      .toolbar { gap: 8px; }
+      .subscribe { width: 44px; padding: 0; font-size: 0; }
+      .main-panel { padding: 28px var(--gutter) 34px; border-right: 0; }
+      .intro-grid {
+        display: block;
+      }
+      .intro-copy {
+        font-size: 16px;
+      }
+      .stat-row {
+        margin-top: 22px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .filter-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .chip { flex: none; }
+      .panel-grid { grid-template-columns: 1fr; }
+      .right-rail { grid-template-columns: 1fr; padding: 28px var(--gutter); }
+      .drawer {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 82vh;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        transform: translateY(100%);
+      }
+      .drawer.is-open { transform: translateY(0); }
+    }
+    @media (max-width: 520px) {
+      .brand strong { font-size: 15px; }
+      .brand span { display: none; }
+      .topbar { align-items: stretch; flex-direction: column; }
+      .search-box { width: 100%; }
+      .toolbar { justify-content: flex-end; }
+      .intro-grid h1 { font-size: 38px; }
+      .post-card,
+      .note-card { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="app-shell" data-od-id="workspace">
+    <aside class="sidebar" aria-label="站点导航">
+      <div class="brand">
+        <span class="brand-mark">K</span>
+        <div>
+          <strong>Knowledge Log</strong>
+          <span>陈栖 / personal OS</span>
+        </div>
+      </div>
+      <nav class="side-nav" id="sideNav" aria-label="内容分区"></nav>
+      <div class="writing-state">
+        <p class="eyebrow">WRITING STATE</p>
+        <span>本周主题：AI coding、内容系统、组件库治理。草稿 7 篇，待发布 2 篇。</span>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar" data-od-id="topbar">
+        <label class="search-box">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m21 21-4.35-4.35"/><circle cx="11" cy="11" r="7"/></svg>
+          <span>搜索知识库</span>
+          <input id="searchInput" aria-label="搜索知识库" placeholder="按标题、标签、项目、摘要检索" autocomplete="off" />
+          <kbd>⌘ K</kbd>
+        </label>
+        <div class="toolbar">
+          <button class="icon-button" id="themeButton" type="button" aria-label="切换深浅色">
+            <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg>
+          </button>
+          <button class="icon-button" id="focusButton" type="button" aria-label="聚焦未读内容">
+            <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+          </button>
+          <button class="subscribe" id="subscribeButton" type="button">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+            <span>订阅更新</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="content-shell">
+        <section class="main-panel" data-od-id="content">
+          <section class="intro-grid" data-od-id="overview">
+            <div>
+              <h1>个人知识工作台</h1>
+              <p class="intro-copy">把文章、项目、技术笔记和生活随笔放在同一个可筛选、可搜索、可持续更新的界面里。</p>
+            </div>
+            <div class="stat-row" aria-label="内容统计">
+              <div class="stat">
+                <strong class="num">34</strong>
+                <span>技术笔记</span>
+              </div>
+              <div class="stat">
+                <strong class="num">12</strong>
+                <span>作品项目</span>
+              </div>
+            </div>
+          </section>
+
+          <div class="filter-row" id="filterRow" aria-label="标签筛选"></div>
+
+          <section class="panel-grid" data-od-id="article-panels">
+            <article class="content-card">
+              <div class="card-head">
+                <h2>精选文章</h2>
+                <span class="meta" id="articleCount">按最近更新排序</span>
+              </div>
+              <div class="post-list" id="postList"></div>
+            </article>
+            <article class="content-card">
+              <div class="card-head">
+                <h2>技术笔记</h2>
+                <span class="meta">速读</span>
+              </div>
+              <div class="note-list" id="noteList"></div>
+            </article>
+          </section>
+        </section>
+
+        <section class="right-rail" data-od-id="right-rail">
+          <div class="rail-section">
+            <p class="eyebrow">TODAY</p>
+            <div class="rail-list" id="timelineList"></div>
+          </div>
+          <div class="rail-section">
+            <p class="eyebrow">PROJECTS</p>
+            <div class="rail-list" id="projectList"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </section>
+
+  <div class="drawer-scrim" id="drawerScrim" aria-hidden="true"></div>
+  <aside class="drawer" id="detailDrawer" aria-label="文章详情" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span id="drawerKind">ARTICLE</span>
+        <h2 id="drawerTitle">文章标题</h2>
+      </div>
+      <button class="drawer-close" id="drawerClose" type="button" aria-label="关闭详情">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-meta" id="drawerMeta"></div>
+      <p id="drawerBody"></p>
+    </div>
+    <div class="drawer-footer">
+      <span class="meta" id="drawerDate">2026.06.05 · 15 min</span>
+      <button class="drawer-action" id="copyButton" type="button">复制摘要</button>
+    </div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite">已复制摘要</div>
+
+  <script>
+    const navItems = ["总览", "文章库", "技术笔记", "作品集", "生活随笔", "归档"];
+    const filters = ["全部", "AI", "前端", "产品", "生活", "未读"];
+    const posts = [
+      {
+        id: 1,
+        kind: "ARTICLE",
+        title: "把个人博客设计成一个长期运行的系统",
+        excerpt: "内容模型、搜索体验、标签体系和作品集入口如何协同。",
+        category: "文章库",
+        tags: ["产品", "写作", "前端"],
+        date: "2026.06.05",
+        readTime: "15 min",
+        unread: true,
+        body: "我想要的个人博客不是一组静态页面，而是一套可以长期增量维护的知识工作台。文章负责沉淀观点，技术笔记负责保存可复用判断，作品集负责把项目从想法推进到可展示的状态。搜索和标签是整个系统的入口，它们让内容在几年后仍然能被找回。"
+      },
+      {
+        id: 2,
+        kind: "PROJECT",
+        title: "Writing OS：从草稿到发布的内容流水线",
+        excerpt: "一个将 Markdown、元数据和发布检查串起来的小工具。",
+        category: "作品集",
+        tags: ["产品", "工具"],
+        date: "2026.06.01",
+        readTime: "8 min",
+        unread: false,
+        body: "Writing OS 的目标是减少发布前的摩擦：补齐标题、摘要、标签、引用和 changelog，再把它们变成可发布的页面。它不追求复杂，只把容易遗漏的步骤整理成稳定清单。"
+      },
+      {
+        id: 3,
+        kind: "LIFE",
+        title: "散步时想到的重构策略",
+        excerpt: "在日常缝隙里观察工程判断是怎么形成的。",
+        category: "生活随笔",
+        tags: ["生活", "写作"],
+        date: "2026.05.24",
+        readTime: "6 min",
+        unread: false,
+        body: "真正有效的重构常常不是大张旗鼓，而是在重复使用中逐渐看见边界。散步能提供一个慢一点的上下文，让脑子把白天的噪音过滤掉，只留下那些值得动手的结构。"
+      },
+      {
+        id: 4,
+        kind: "NOTE",
+        title: "React Server Components 的缓存边界",
+        excerpt: "什么时候缓存数据，什么时候缓存界面，以及如何避免状态误判。",
+        category: "技术笔记",
+        tags: ["前端", "React", "未读"],
+        date: "2026.05.18",
+        readTime: "11 min",
+        unread: true,
+        body: "RSC 的缓存边界不是单纯的性能问题，它还会影响状态的语义。把可重放的数据请求、用户态交互和服务端渲染结果分清楚，才能避免页面看似更新、实际状态滞后的错觉。"
+      },
+      {
+        id: 5,
+        kind: "NOTE",
+        title: "搜索体验里的空状态",
+        excerpt: "让无结果页面继续提供标签、建议和最近阅读入口。",
+        category: "技术笔记",
+        tags: ["产品", "前端"],
+        date: "2026.05.12",
+        readTime: "7 min",
+        unread: false,
+        body: "空状态不应该只告诉用户没有内容。更好的方式是给出相邻路径：改写关键词、查看热门标签、回到最近阅读，或者订阅这个主题后续更新。"
+      },
+      {
+        id: 6,
+        kind: "NOTE",
+        title: "组件库里最容易被忽略的文本密度",
+        excerpt: "按钮、标签、输入框和列表行的尺寸如何保持扫描效率。",
+        category: "技术笔记",
+        tags: ["前端", "设计系统"],
+        date: "2026.05.06",
+        readTime: "9 min",
+        unread: false,
+        body: "组件库的可用性经常败在文本密度上。字号、行高、标签长度和按钮宽度如果没有统一边界，页面很快就会从整洁变成难以扫描的碎片。"
+      }
+    ];
+    const projects = [
+      ["Note Compiler", "内容生成工具"],
+      ["Design Token Lab", "主题系统实验"],
+      ["Reading Tracker", "阅读索引"]
+    ];
+    const timeline = [
+      ["09:30", "整理技术笔记", "把 RSC 缓存案例加入文章草稿。"],
+      ["14:00", "项目复盘", "补充 Writing OS 的交互截图。"],
+      ["21:20", "生活随笔", "记录一次晚间散步和代码 review。"]
+    ];
+
+    const state = {
+      nav: "总览",
+      filter: "全部",
+      query: "",
+      selected: posts[0],
+      subscribed: false
+    };
+
+    const sideNav = document.querySelector("#sideNav");
+    const filterRow = document.querySelector("#filterRow");
+    const postList = document.querySelector("#postList");
+    const noteList = document.querySelector("#noteList");
+    const articleCount = document.querySelector("#articleCount");
+    const searchInput = document.querySelector("#searchInput");
+    const drawer = document.querySelector("#detailDrawer");
+    const drawerScrim = document.querySelector("#drawerScrim");
+    const drawerKind = document.querySelector("#drawerKind");
+    const drawerTitle = document.querySelector("#drawerTitle");
+    const drawerBody = document.querySelector("#drawerBody");
+    const drawerMeta = document.querySelector("#drawerMeta");
+    const drawerDate = document.querySelector("#drawerDate");
+    const toast = document.querySelector("#toast");
+
+    function iconBook() {
+      return '<svg class="note-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5Z"/><path d="M4 5.5v16M8 7h8"/></svg>';
+    }
+
+    function iconFolder() {
+      return '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5Z"/></svg>';
+    }
+
+    function matches(post) {
+      const query = state.query.trim().toLowerCase();
+      const navOk = state.nav === "总览" || post.category === state.nav;
+      const filterOk =
+        state.filter === "全部" ||
+        post.tags.includes(state.filter) ||
+        post.category.includes(state.filter) ||
+        (state.filter === "未读" && post.unread);
+      const content = [post.title, post.excerpt, post.category, post.kind, ...post.tags].join(" ").toLowerCase();
+      return navOk && filterOk && (!query || content.includes(query));
+    }
+
+    function renderNav() {
+      sideNav.innerHTML = navItems.map((item) => `
+        <button type="button" class="${state.nav === item ? "is-active" : ""}" data-nav="${item}">${item}</button>
+      `).join("");
+      sideNav.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.nav = button.dataset.nav;
+          render();
+        });
+      });
+    }
+
+    function renderFilters() {
+      filterRow.innerHTML = filters.map((filter) => `
+        <button class="chip ${state.filter === filter ? "is-active" : ""}" type="button" data-filter="${filter}">${filter}</button>
+      `).join("");
+      filterRow.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.filter = button.dataset.filter;
+          render();
+        });
+      });
+    }
+
+    function openDrawer(post) {
+      state.selected = post;
+      drawerKind.textContent = post.kind;
+      drawerTitle.textContent = post.title;
+      drawerBody.textContent = post.body;
+      drawerDate.textContent = `${post.date} · ${post.readTime}`;
+      drawerMeta.innerHTML = post.tags.map((tag) => `<span class="tag">${tag}</span>`).join("");
+      drawer.classList.add("is-open");
+      drawerScrim.classList.add("is-open");
+      drawer.setAttribute("aria-hidden", "false");
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("is-open");
+      drawerScrim.classList.remove("is-open");
+      drawer.setAttribute("aria-hidden", "true");
+    }
+
+    function renderPosts() {
+      const visible = posts.filter(matches);
+      const featured = visible.filter((post) => post.category !== "技术笔记").slice(0, 3);
+      const notes = visible.filter((post) => post.category === "技术笔记").slice(0, 4);
+      articleCount.textContent = visible.length ? `${visible.length} 条匹配` : "无匹配结果";
+      postList.innerHTML = featured.length
+        ? featured.map((post) => `
+          <button class="post-card" type="button" data-id="${post.id}">
+            <div class="post-kind">${post.kind}</div>
+            <h3>${post.title}</h3>
+            <p>${post.excerpt}</p>
+          </button>
+        `).join("")
+        : '<div class="empty-state">没有符合条件的精选文章。试试清空搜索或切换标签。</div>';
+      noteList.innerHTML = notes.length
+        ? notes.map((post) => `
+          <button class="note-card" type="button" data-id="${post.id}">
+            ${iconBook()}
+            <span>
+              <h3>${post.title}</h3>
+              <p>${post.excerpt}</p>
+            </span>
+          </button>
+        `).join("")
+        : '<div class="empty-state">当前筛选下没有技术笔记。</div>';
+      document.querySelectorAll("[data-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const post = posts.find((item) => String(item.id) === button.dataset.id);
+          if (post) openDrawer(post);
+        });
+      });
+    }
+
+    function renderRail() {
+      document.querySelector("#timelineList").innerHTML = timeline.map(([time, title, copy]) => `
+        <article class="timeline-item">
+          <span class="meta num">${time}</span>
+          <div>
+            <strong>${title}</strong>
+            <p>${copy}</p>
+          </div>
+        </article>
+      `).join("");
+      document.querySelector("#projectList").innerHTML = projects.map(([title, copy]) => `
+        <article class="project-card">
+          ${iconFolder()}
+          <div>
+            <strong>${title}</strong>
+            <span>${copy}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function render() {
+      renderNav();
+      renderFilters();
+      renderPosts();
+    }
+
+    searchInput.addEventListener("input", (event) => {
+      state.query = event.target.value;
+      renderPosts();
+    });
+
+    document.querySelector("#themeButton").addEventListener("click", () => {
+      document.body.classList.toggle("is-dark");
+    });
+
+    document.querySelector("#focusButton").addEventListener("click", () => {
+      state.filter = state.filter === "未读" ? "全部" : "未读";
+      render();
+    });
+
+    document.querySelector("#subscribeButton").addEventListener("click", (event) => {
+      state.subscribed = !state.subscribed;
+      event.currentTarget.classList.toggle("is-on", state.subscribed);
+      event.currentTarget.querySelector("span").textContent = state.subscribed ? "已订阅" : "订阅更新";
+    });
+
+    document.querySelector("#drawerClose").addEventListener("click", closeDrawer);
+    drawerScrim.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeDrawer();
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    document.querySelector("#copyButton").addEventListener("click", async () => {
+      const text = `${state.selected.title}：${state.selected.excerpt}`;
+      try {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+        }
+      } finally {
+        toast.classList.add("is-visible");
+        setTimeout(() => toast.classList.remove("is-visible"), 1400);
+      }
+    });
+
+    renderRail();
+    render();
+  </script>
+</body>
+</html>

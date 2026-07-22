@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Design QA Comparison</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #dfe7f1;
+        color: #132032;
+        font-family: Inter, system-ui, sans-serif;
+      }
+
+      .comparison {
+        display: grid;
+        grid-template-columns: 1440px 1440px;
+        gap: 24px;
+      }
+
+      figure {
+        margin: 0;
+      }
+
+      figcaption {
+        margin-bottom: 10px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      img {
+        display: block;
+        width: 1440px;
+        height: 1024px;
+        border: 1px solid #b7c4d4;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="comparison">
+      <figure>
+        <figcaption>Source: option 3 knowledge console</figcaption>
+        <img src="./source-reference.png" alt="Reference design" />
+      </figure>
+      <figure>
+        <figcaption>Implementation: personal blog</figcaption>
+        <img src="./final-home-1440x1024.png" alt="Rendered implementation" />
+      </figure>
+    </main>
+  </body>
+</html>
