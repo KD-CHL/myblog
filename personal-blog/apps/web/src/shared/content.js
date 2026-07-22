@@ -58,6 +58,10 @@ export function actionLabel(action) {
     "content.exported": "导出内容备份",
     "subscription.created": "新增订阅",
     "subscription.unsubscribed": "取消订阅",
+    "comment.created": "新增评论",
+    "comment.hidden": "隐藏评论",
+    "comment.approved": "恢复评论",
+    "comment.deleted": "删除评论",
   };
   return labels[action] || action;
 }

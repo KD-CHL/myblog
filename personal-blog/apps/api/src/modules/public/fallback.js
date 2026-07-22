@@ -98,6 +98,21 @@ export function getFallbackTags() {
   return getAllTags(fallbackPosts);
 }
 
+export function getFallbackTagStats() {
+  const stats = new Map();
+  for (const post of fallbackPosts) {
+    for (const rawTag of post.tags) {
+      const key = rawTag.toLowerCase();
+      const entry = stats.get(key);
+      if (entry) entry.count += 1;
+      else stats.set(key, { count: 1, name: rawTag });
+    }
+  }
+  return [...stats.values()].sort(
+    (a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"),
+  );
+}
+
 export function getFallbackSiteBundle() {
   const settings = {
     ...defaultSiteSettings,

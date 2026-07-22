@@ -7,12 +7,16 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
 import { PostPage } from "./pages/PostPage.jsx";
+import { TagPage } from "./pages/TagPage.jsx";
+import { BackToTop } from "./shared/components/BackToTop.jsx";
+import { SearchOverlay } from "./shared/components/SearchOverlay.jsx";
 
 export function App() {
   const { navigate, route } = useRouter();
   const [isDark, setIsDark] = useState(getInitialTheme);
   const [user, setUser] = useState(null);
   const [authStatus, setAuthStatus] = useState("loading");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const theme = isDark ? "dark" : "light";
@@ -38,6 +42,19 @@ export function App() {
     };
   }, []);
 
+  /* Global ⌘K / Ctrl+K opens the search overlay.
+     Home keeps its own inline ⌘K focus behavior; login/admin are skipped. */
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      if (["home", "login"].includes(route.name) || route.name.startsWith("admin")) return;
+      event.preventDefault();
+      setIsSearchOpen((current) => !current);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [route.name]);
+
   async function handleLogout() {
     try {
       await logoutAdmin();
@@ -52,14 +69,25 @@ export function App() {
     isDark,
     navigate,
     onLogout: handleLogout,
+    onOpenSearch: () => setIsSearchOpen(true),
     setIsDark,
     setUser,
     user,
   };
 
-  if (route.name === "login") return <LoginPage {...commonProps} next={route.next} />;
-  if (route.name.startsWith("admin")) return <AdminArea {...commonProps} route={route} />;
-  if (route.name === "post") return <PostPage {...commonProps} slug={route.slug} />;
-  if (route.name === "not-found") return <NotFoundPage {...commonProps} />;
-  return <HomePage {...commonProps} />;
+  let page;
+  if (route.name === "login") page = <LoginPage {...commonProps} next={route.next} />;
+  else if (route.name.startsWith("admin")) page = <AdminArea {...commonProps} route={route} />;
+  else if (route.name === "post") page = <PostPage {...commonProps} slug={route.slug} />;
+  else if (route.name === "tags") page = <TagPage {...commonProps} tag={route.tag} />;
+  else if (route.name === "not-found") page = <NotFoundPage {...commonProps} />;
+  else page = <HomePage {...commonProps} />;
+
+  return (
+    <>
+      {page}
+      <SearchOverlay navigate={navigate} onClose={() => setIsSearchOpen(false)} open={isSearchOpen} />
+      <BackToTop />
+    </>
+  );
 }

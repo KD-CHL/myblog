@@ -49,9 +49,7 @@ export function getConfig() {
   const sessionSecret =
     process.env.SESSION_SECRET || (!isProduction ? "local-development-session-secret-change-me" : "");
   const configuredOrigins = parseList(process.env.ALLOWED_ORIGINS || process.env.APP_ORIGIN);
-  const localOrigins = isProduction
-    ? []
-    : ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:4174"];
+  const localOrigins = isProduction ? [] : ["http://127.0.0.1:*", "http://localhost:*"];
 
   return {
     admin: {
@@ -78,6 +76,7 @@ export function getConfig() {
     logLevel: process.env.LOG_LEVEL || (isProduction ? "info" : "debug"),
     maxBodyBytes: parsePositiveInteger(process.env.MAX_BODY_BYTES, 1024 * 1024),
     port: parsePositiveInteger(process.env.PORT, 4174),
+    publicUrl: process.env.PUBLIC_URL || configuredOrigins[0] || "",
     session: {
       cookieName: "blog_session",
       secret: sessionSecret,

@@ -1,7 +1,7 @@
 import { getConfig } from "../../config.js";
 import { recordAuditEvent, listAuditEvents } from "../audit/repository.js";
-import { getPostTags } from "../posts/repository.js";
-import { getFallbackSiteBundle, getFallbackTags } from "../public/fallback.js";
+import { getPostTags, getTagStats } from "../posts/repository.js";
+import { getFallbackSiteBundle, getFallbackTags, getFallbackTagStats } from "../public/fallback.js";
 import { getAdminDashboard, getPublicSiteBundle, getSiteSettings, updateSiteSettings } from "./repository.js";
 import { listSubscriptions } from "../subscriptions/repository.js";
 import { createContentExport } from "../admin/export.js";
@@ -11,9 +11,13 @@ export function registerSiteRoutes(router) {
     body: getConfig().database.configured ? await getPublicSiteBundle() : getFallbackSiteBundle(),
   }));
 
-  router.add("GET", "/api/tags", async () => ({
-    body: { tags: getConfig().database.configured ? await getPostTags() : getFallbackTags() },
-  }));
+  router.add("GET", "/api/tags", async () => {
+    const configured = getConfig().database.configured;
+    const [tags, stats] = configured
+      ? await Promise.all([getPostTags(), getTagStats()])
+      : [getFallbackTags(), getFallbackTagStats()];
+    return { body: { stats, tags } };
+  });
 
   router.add("GET", "/api/admin/dashboard", async () => {
     const [dashboard, subscriptions] = await Promise.all([

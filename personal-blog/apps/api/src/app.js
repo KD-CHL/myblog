@@ -15,6 +15,8 @@ import { createRouter } from "./core/router.js";
 import { getDatabaseHealth, initializeDatabase } from "./db/bootstrap.js";
 import { requireSession } from "./modules/auth/service.js";
 import { registerAuthRoutes } from "./modules/auth/routes.js";
+import { registerCommentRoutes } from "./modules/comments/routes.js";
+import { registerFeedRoutes } from "./modules/feed/routes.js";
 import { registerPostRoutes } from "./modules/posts/routes.js";
 import { registerSiteRoutes } from "./modules/site/routes.js";
 import { registerSubscriptionRoutes } from "./modules/subscriptions/routes.js";
@@ -58,6 +60,8 @@ router.add("GET", "/api/health", async () => {
 });
 
 registerAuthRoutes(router);
+registerCommentRoutes(router);
+registerFeedRoutes(router);
 registerPostRoutes(router);
 registerSiteRoutes(router);
 registerSubscriptionRoutes(router);
@@ -113,7 +117,9 @@ export async function handleRequest(request, response) {
     if (route.options.write) writeRateLimiter.consume(`${ip}:${context.user?.username || "anonymous"}`);
 
     const result = (await route.handler(context)) || {};
-    sendJson(response, result.statusCode || 200, result.body ?? { ok: true }, result.headers);
+    if (!response.writableEnded) {
+      sendJson(response, result.statusCode || 200, result.body ?? { ok: true }, result.headers);
+    }
     logger.info("http.request.completed", {
       durationMs: Math.round(performance.now() - startedAt),
       method: request.method,
@@ -124,20 +130,22 @@ export async function handleRequest(request, response) {
   } catch (rawError) {
     const error = normalizeError(rawError);
     const headers = error.retryAfterSeconds ? { "Retry-After": String(error.retryAfterSeconds) } : {};
-    sendJson(
-      response,
-      error.statusCode,
-      {
-        error: {
-          code: error.code || "INTERNAL_ERROR",
-          ...(error.details ? { details: error.details } : {}),
-          message: error.statusCode >= 500 && config.isProduction ? "服务暂时不可用，请稍后重试。" : error.message,
-          requestId,
-          statusCode: error.statusCode,
+    if (!response.writableEnded) {
+      sendJson(
+        response,
+        error.statusCode,
+        {
+          error: {
+            code: error.code || "INTERNAL_ERROR",
+            ...(error.details ? { details: error.details } : {}),
+            message: error.statusCode >= 500 && config.isProduction ? "服务暂时不可用，请稍后重试。" : error.message,
+            requestId,
+            statusCode: error.statusCode,
+          },
         },
-      },
-      headers,
-    );
+        headers,
+      );
+    }
     logger[error.statusCode >= 500 ? "error" : "warn"]("http.request.failed", {
       code: error.code,
       durationMs: Math.round(performance.now() - startedAt),

@@ -76,7 +76,15 @@ export function resolveCorsOrigin(request, allowedOrigins) {
   const origin = request.headers.origin;
   if (!origin) return "";
   const sameOrigin = origin === requestOrigin(request);
-  return sameOrigin || allowedOrigins.includes(origin) ? origin : "";
+  if (sameOrigin || allowedOrigins.includes(origin)) return origin;
+
+  try {
+    const { hostname, port, protocol } = new URL(origin);
+    if (port && allowedOrigins.includes(`${protocol}//${hostname}:*`)) return origin;
+  } catch {
+    return "";
+  }
+  return "";
 }
 
 export function assertTrustedMutation(request, allowedOrigins) {

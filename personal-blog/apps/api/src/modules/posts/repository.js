@@ -363,6 +363,17 @@ export async function getPostTags({ includeDrafts = false } = {}) {
   return getAllTags(result.posts);
 }
 
+export async function getTagStats() {
+  const result = await getDatabase().execute(`
+    SELECT MIN(je.value) AS name, COUNT(DISTINCT posts.id) AS count
+    FROM posts, json_each(posts.tags) AS je
+    WHERE posts.status = 'published' AND posts.archived_at IS NULL
+    GROUP BY lower(je.value)
+    ORDER BY count DESC, MIN(je.value) ASC
+  `);
+  return result.rows.map((row) => ({ count: Number(row.count), name: row.name }));
+}
+
 export function summarizePosts(posts) {
   return posts.map(summarizePost);
 }

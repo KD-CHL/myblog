@@ -55,7 +55,7 @@ test("personal blog API complete workflow", async (suite) => {
     assert.equal(response.status, 200);
     assert.equal(payload.database.provider, "sqlite");
     assert.equal(payload.database.migrationCurrent, true);
-    assert.equal(payload.database.migrationVersion, 6);
+    assert.equal(payload.database.migrationVersion, 7);
   });
 
   await suite.test("rejects unauthenticated and cross-site writes", async () => {
@@ -73,6 +73,13 @@ test("personal blog API complete workflow", async (suite) => {
     });
     assert.equal(crossSite.response.status, 403);
     assert.equal(crossSite.payload.error.code, "ORIGIN_NOT_ALLOWED");
+
+    const loopbackAnyPort = await request("/api/auth/login", {
+      body: { password: "x", username: "x" },
+      headers: { Origin: "http://127.0.0.1:5199" },
+      method: "POST",
+    });
+    assert.equal(loopbackAnyPort.response.status, 401);
   });
 
   await suite.test("logs in with an HttpOnly session cookie", async () => {
@@ -230,6 +237,104 @@ test("personal blog API complete workflow", async (suite) => {
     assert.ok(adminAudit.payload.events.every((event) => event.requestId));
   });
 
+  await suite.test("moderates comments without leaking author emails", async () => {
+    const invalid = await request(`/api/posts/${createdPost.id}/comments`, {
+      body: { authorName: "", content: "" },
+      method: "POST",
+    });
+    assert.equal(invalid.response.status, 422);
+    assert.equal(invalid.payload.error.code, "VALIDATION_ERROR");
+
+    const created = await request(`/api/posts/${createdPost.id}/comments`, {
+      body: { authorEmail: "commenter@example.com", authorName: "访客读者", content: "写得很清楚，感谢分享！" },
+      method: "POST",
+    });
+    assert.equal(created.response.status, 201);
+    assert.equal(created.payload.comment.authorName, "访客读者");
+    assert.equal("authorEmail" in created.payload.comment, false);
+    const commentId = created.payload.comment.id;
+
+    const publicList = await request(`/api/posts/${createdPost.id}/comments`);
+    assert.equal(publicList.response.status, 200);
+    assert.equal(publicList.payload.commentsEnabled, true);
+    assert.ok(publicList.payload.comments.some((comment) => comment.id === commentId));
+    assert.equal(JSON.stringify(publicList.payload).includes("commenter@example.com"), false);
+
+    const unauthenticatedAdmin = await request("/api/admin/comments");
+    assert.equal(unauthenticatedAdmin.response.status, 401);
+
+    const adminList = await request("/api/admin/comments?status=all", { useCookie: true });
+    assert.equal(adminList.response.status, 200);
+    const adminRow = adminList.payload.comments.find((comment) => comment.id === commentId);
+    assert.equal(adminRow.authorEmail, "commenter@example.com");
+    assert.equal(adminRow.postTitle, createdPost.title);
+
+    await request(`/api/admin/comments/${commentId}/hide`, { method: "POST", useCookie: true });
+    const hiddenList = await request(`/api/posts/${createdPost.id}/comments`);
+    assert.equal(hiddenList.payload.comments.some((comment) => comment.id === commentId), false);
+
+    await request(`/api/admin/comments/${commentId}/approve`, { method: "POST", useCookie: true });
+    const restoredList = await request(`/api/posts/${createdPost.id}/comments`);
+    assert.ok(restoredList.payload.comments.some((comment) => comment.id === commentId));
+
+    const removed = await request(`/api/admin/comments/${commentId}`, { method: "DELETE", useCookie: true });
+    assert.equal(removed.response.status, 200);
+    const emptyList = await request(`/api/posts/${createdPost.id}/comments`);
+    assert.equal(emptyList.payload.pagination.total, 0);
+
+    const missing = await request(`/api/admin/comments/${commentId}`, { method: "DELETE", useCookie: true });
+    assert.equal(missing.response.status, 404);
+    assert.equal(missing.payload.error.code, "COMMENT_NOT_FOUND");
+  });
+
+  await suite.test("rate limits comment submissions per IP", async () => {
+    let last;
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      last = await request(`/api/posts/${createdPost.id}/comments`, {
+        body: { authorName: "刷屏用户", content: `重复评论 ${attempt + 1}` },
+        headers: { "X-Forwarded-For": "203.0.113.7" },
+        method: "POST",
+      });
+    }
+    assert.equal(last.response.status, 429);
+    assert.equal(last.payload.error.code, "RATE_LIMITED");
+  });
+
+  await suite.test("serves an RSS feed of published posts only", async () => {
+    const draft = await request("/api/posts", {
+      body: { body: "Draft only body.", excerpt: "Draft only excerpt.", kind: "NOTE", status: "draft", title: "Feed exclusion draft" },
+      method: "POST",
+      useCookie: true,
+    });
+    assert.equal(draft.response.status, 201);
+
+    const feedResponse = await fetch(`${baseUrl}/api/feed`);
+    assert.equal(feedResponse.status, 200);
+    assert.match(feedResponse.headers.get("content-type"), /application\/rss\+xml/);
+    const xml = await feedResponse.text();
+    assert.ok(xml.includes("<rss"));
+    assert.ok(xml.includes(createdPost.title));
+    assert.equal(xml.includes("Feed exclusion draft"), false);
+  });
+
+  await suite.test("lists tag statistics for published posts only", async () => {
+    const tags = await request("/api/tags");
+    assert.equal(tags.response.status, 200);
+    assert.ok(Array.isArray(tags.payload.tags));
+    assert.ok(Array.isArray(tags.payload.stats));
+    const apiStat = tags.payload.stats.find((item) => item.name.toLowerCase() === "api");
+    assert.ok(apiStat);
+    assert.equal(apiStat.count, 1);
+
+    await request("/api/posts", {
+      body: { body: "Draft body.", excerpt: "Draft excerpt.", status: "draft", tags: ["草稿标签"], title: "Tag stats draft" },
+      method: "POST",
+      useCookie: true,
+    });
+    const afterDraft = await request("/api/tags");
+    assert.equal(afterDraft.payload.stats.some((item) => item.name === "草稿标签"), false);
+  });
+
   await suite.test("purges only after archive and invalidates the session on logout", async () => {
     const archived = await request(`/api/posts/${createdPost.id}/archive`, {
       body: { version: createdPost.version },
@@ -290,6 +395,29 @@ test("personal blog API complete workflow", async (suite) => {
       });
       assert.equal(rejectedWrite.response.status, 503);
       assert.equal(rejectedWrite.payload.error.code, "DATABASE_NOT_CONFIGURED");
+
+      const feedResponse = await fetch(`${baseUrl}/api/feed`);
+      assert.equal(feedResponse.status, 200);
+      assert.match(feedResponse.headers.get("content-type"), /application\/rss\+xml/);
+      assert.ok((await feedResponse.text()).includes("<rss"));
+
+      const fallbackTags = await request("/api/tags");
+      assert.equal(fallbackTags.response.status, 200);
+      assert.ok(fallbackTags.payload.stats.length > 0);
+      assert.ok(fallbackTags.payload.stats.every((item) => item.count >= 1 && item.name));
+
+      const seedId = posts.payload.posts[0].id;
+      const fallbackComments = await request(`/api/posts/${seedId}/comments`);
+      assert.equal(fallbackComments.response.status, 200);
+      assert.equal(fallbackComments.payload.commentsEnabled, false);
+      assert.equal(fallbackComments.payload.comments.length, 0);
+
+      const rejectedComment = await request(`/api/posts/${seedId}/comments`, {
+        body: { authorName: "访客", content: "测试评论" },
+        method: "POST",
+      });
+      assert.equal(rejectedComment.response.status, 503);
+      assert.equal(rejectedComment.payload.error.code, "DATABASE_NOT_CONFIGURED");
     } finally {
       if (previousVercel === undefined) delete process.env.VERCEL;
       else process.env.VERCEL = previousVercel;

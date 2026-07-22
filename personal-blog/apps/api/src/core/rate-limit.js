@@ -27,4 +27,5 @@ class MemoryRateLimiter {
 
 export const loginRateLimiter = new MemoryRateLimiter({ limit: 5, windowMs: 15 * 60 * 1000 });
 export const subscriptionRateLimiter = new MemoryRateLimiter({ limit: 10, windowMs: 60 * 60 * 1000 });
+export const commentRateLimiter = new MemoryRateLimiter({ limit: 5, windowMs: 10 * 60 * 1000 });
 export const writeRateLimiter = new MemoryRateLimiter({ limit: 90, windowMs: 60 * 1000 });

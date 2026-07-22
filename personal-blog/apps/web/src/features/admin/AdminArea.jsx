@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useBodyScrollLock, useDocumentTitle } from "../../app/hooks.js";
 import { MenuButton, SidebarScrim, ThemeButton } from "../../shared/components/Navigation.jsx";
 import { AdminAudit } from "./AdminAudit.jsx";
+import { AdminComments } from "./AdminComments.jsx";
 import { AdminDashboard } from "./AdminDashboard.jsx";
 import { AdminSettings } from "./AdminSettings.jsx";
 import { AdminSidebar } from "./AdminSidebar.jsx";
@@ -12,6 +13,7 @@ import { PostEditor } from "./PostEditor.jsx";
 const titles = {
   admin: "文章管理",
   "admin-audit": "操作记录",
+  "admin-comments": "评论管理",
   "admin-edit": "写作编辑器",
   "admin-new": "写作编辑器",
   "admin-settings": "站点设置",
@@ -51,6 +53,7 @@ export function AdminArea({ authStatus, isDark, navigate, onLogout, route, setIs
         {route.name === "admin-settings" && <AdminSettings />}
         {route.name === "admin-audit" && <AdminAudit />}
         {route.name === "admin-subscriptions" && <AdminSubscriptions />}
+        {route.name === "admin-comments" && <AdminComments navigate={navigate} />}
       </section>
     </main>
   );

@@ -12,7 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSubscription, fetchPosts, fetchSite, unsubscribe } from "../api.js";
-import { useBodyScrollLock, useDebouncedValue, useDocumentTitle } from "../app/hooks.js";
+import { useBodyScrollLock, useDebouncedValue, usePageMeta } from "../app/hooks.js";
 import { readStoredJson, SUBSCRIPTION_STORAGE_KEY, formatDateTime } from "../shared/content.js";
 import { fallbackSite } from "../shared/site.js";
 import { Modal, StatusBanner, Toast } from "../shared/components/Feedback.jsx";
@@ -24,7 +24,6 @@ import {
 } from "../shared/components/Navigation.jsx";
 
 export function HomePage({ isDark, navigate, setIsDark, user }) {
-  useDocumentTitle("个人知识工作台 | Knowledge Log");
   const savedSubscription = useMemo(() => readStoredJson(SUBSCRIPTION_STORAGE_KEY), []);
   const [siteBundle, setSiteBundle] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -51,6 +50,12 @@ export function HomePage({ isDark, navigate, setIsDark, user }) {
   const site = siteBundle?.site ?? fallbackSite;
   const projects = siteBundle?.projects ?? [];
   const timeline = siteBundle?.timeline ?? [];
+
+  usePageMeta({
+    description: site.hero?.description,
+    og: { image: "/og-image.png", title: `${site.hero?.title || "个人知识工作台"} | ${site.brand.title}` },
+    title: `${site.hero?.title || "个人知识工作台"} | ${site.brand.title}`,
+  });
 
   useBodyScrollLock(isMenuOpen || isSubscriptionOpen || (isFiltersOpen && window.innerWidth <= 1120));
 
@@ -318,8 +323,8 @@ export function HomePage({ isDark, navigate, setIsDark, user }) {
           <aside className={isFiltersOpen ? "right-rail" : "right-rail is-collapsed"} aria-label="筛选和更新">
             <button aria-label="关闭侧栏" className="rail-close" onClick={() => setIsFiltersOpen(false)} type="button"><X size={18} /></button>
             <section><h2>FILTER TAGS</h2><div className="tag-cloud">
-              {site.filterTags.map((tag) => (
-                <button aria-pressed={activeFilter === tag} className={activeFilter === tag ? "tag is-active" : "tag"} key={tag} onClick={() => { setActiveFilter(tag); if (window.innerWidth <= 1120) setIsFiltersOpen(false); }} type="button">{tag}</button>
+              {site.filterTags.filter((tagName) => tagName !== "全部").map((tagName) => (
+                <button className="tag" key={tagName} onClick={() => navigate(`/tags/${encodeURIComponent(tagName)}`)} type="button">{tagName}</button>
               ))}
             </div></section>
             <section><h2>LATEST</h2><div className="timeline">

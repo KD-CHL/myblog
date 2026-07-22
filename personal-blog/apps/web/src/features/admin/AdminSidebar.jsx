@@ -1,4 +1,5 @@
 import {
+  ChatCircle,
   ClockCounterClockwise,
   FileText,
   Gear,
@@ -13,6 +14,7 @@ const links = [
   { icon: Plus, label: "新建文章", names: ["admin-new", "admin-edit"], path: "/admin/posts/new" },
   { icon: Gear, label: "站点设置", names: ["admin-settings"], path: "/admin/settings" },
   { icon: Users, label: "订阅名单", names: ["admin-subscriptions"], path: "/admin/subscriptions" },
+  { icon: ChatCircle, label: "评论管理", names: ["admin-comments"], path: "/admin/comments" },
   { icon: ClockCounterClockwise, label: "操作记录", names: ["admin-audit"], path: "/admin/audit" },
 ];
 

@@ -54,6 +54,10 @@ export function fetchSite() {
   return request("/site");
 }
 
+export function fetchTags() {
+  return request("/tags");
+}
+
 export function fetchPosts(options = {}) {
   return request(withQuery("/posts", options));
 }
@@ -148,4 +152,31 @@ export function fetchSubscriptions(options = {}) {
 
 export function fetchContentExport() {
   return request("/admin/export");
+}
+
+export function fetchPostComments(postId, options = {}) {
+  return request(withQuery(`/posts/${encodeURIComponent(postId)}/comments`, options));
+}
+
+export function createComment(postId, payload) {
+  return request(`/posts/${encodeURIComponent(postId)}/comments`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchAdminComments(options = {}) {
+  return request(withQuery("/admin/comments", options));
+}
+
+export function hideComment(id) {
+  return request(`/admin/comments/${encodeURIComponent(id)}/hide`, { method: "POST" });
+}
+
+export function approveComment(id) {
+  return request(`/admin/comments/${encodeURIComponent(id)}/approve`, { method: "POST" });
+}
+
+export function deleteComment(id) {
+  return request(`/admin/comments/${encodeURIComponent(id)}`, { method: "DELETE" });
 }

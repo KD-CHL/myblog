@@ -226,6 +226,29 @@ const migrations = [
       }
     },
   },
+  {
+    name: "comments-table",
+    version: 7,
+    async up(connection) {
+      await connection.executeMultiple(`
+        CREATE TABLE IF NOT EXISTS comments (
+          id TEXT PRIMARY KEY,
+          post_id TEXT NOT NULL,
+          author_name TEXT NOT NULL,
+          author_email TEXT,
+          content TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'approved'
+            CHECK (status IN ('approved', 'hidden')),
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS comments_post_idx ON comments(post_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS comments_status_idx ON comments(status);
+        CREATE INDEX IF NOT EXISTS comments_created_idx ON comments(created_at);
+      `);
+    },
+  },
 ];
 
 export const latestMigrationVersion = migrations.at(-1)?.version || 0;
